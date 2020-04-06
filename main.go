@@ -7,10 +7,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 type Handler struct {
-	dynamoClient     *dynamodb.DynamoDB
+	DynamoClient *dynamodb.DynamoDB
 }
 
 type Round struct {
@@ -25,7 +26,7 @@ type Result struct {
 
 func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	handler := Handler{
-		dynamoClient: getDynamoClient(),
+		DynamoClient: getDynamoClient(),
 	}
 
 	queriedRound := request.QueryStringParameters["queriedRound"]
@@ -59,11 +60,51 @@ func getDynamoClient() *dynamodb.DynamoDB {
 }
 
 func (handler *Handler) getAllRounds() []Round {
+	params := &dynamodb.ScanInput{
+		TableName: aws.String("BeerCartingTour"),
+	}
+	result, err := handler.DynamoClient.Scan(params)
+	if err != nil {
+		panic(err)
+	}
 
+	var rounds []Round
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &rounds)
+	if err != nil {
+		panic(err)
+	}
+
+	return rounds
 }
 
 func (handler *Handler) getRound(round string) Round {
+	var queryInput = &dynamodb.QueryInput{
+		TableName: aws.String("BeerCartingTour"),
+		IndexName: aws.String("Round"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"Round": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String(round),
+					},
+				},
+			},
+		},
+	}
 
+	var response, err = handler.DynamoClient.Query(queryInput)
+	if err != nil {
+		panic(err)
+	}
+
+	var roundResult Round
+	err = dynamodbattribute.UnmarshalListOfMaps(response.Items, &roundResult)
+	if err != nil {
+		panic(err)
+	}
+
+	return roundResult
 }
 
 func main() {
