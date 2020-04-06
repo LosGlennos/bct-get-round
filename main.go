@@ -81,6 +81,7 @@ func (handler *Handler) getRound(round string) Round {
 	var queryInput = &dynamodb.QueryInput{
 		TableName: aws.String("BeerCartingTour"),
 		IndexName: aws.String("Round"),
+		AttributesToGet: []*string{aws.String("PlayerName"), aws.String("Points")},
 		KeyConditions: map[string]*dynamodb.Condition{
 			"Round": {
 				ComparisonOperator: aws.String("EQ"),
