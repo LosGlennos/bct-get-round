@@ -15,11 +15,7 @@ type Handler struct {
 }
 
 type Round struct {
-	Round   string   `json:"round"`
-	Results []Result `json:"results"`
-}
-
-type Result struct {
+	Round      string `json:"round"`
 	PlayerName string `json:"playerName"`
 	Points     int    `json:"points"`
 }
@@ -79,8 +75,8 @@ func (handler *Handler) getAllRounds() []Round {
 
 func (handler *Handler) getRound(round string) Round {
 	var queryInput = &dynamodb.QueryInput{
-		TableName: aws.String("BeerCartingTour"),
-		IndexName: aws.String("Round"),
+		TableName:       aws.String("BeerCartingTour"),
+		IndexName:       aws.String("Round"),
 		AttributesToGet: []*string{aws.String("PlayerName"), aws.String("Points")},
 		KeyConditions: map[string]*dynamodb.Condition{
 			"Round": {
