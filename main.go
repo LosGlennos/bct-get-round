@@ -73,7 +73,7 @@ func (handler *Handler) getAllRounds() []Round {
 	return rounds
 }
 
-func (handler *Handler) getRound(round string) Round {
+func (handler *Handler) getRound(round string) []Round {
 	var queryInput = &dynamodb.QueryInput{
 		TableName:       aws.String("BeerCartingTour"),
 		AttributesToGet: []*string{aws.String("Round"), aws.String("PlayerName"), aws.String("Points")},
@@ -94,7 +94,7 @@ func (handler *Handler) getRound(round string) Round {
 		panic(err)
 	}
 
-	var roundResult Round
+	var roundResult []Round
 	err = dynamodbattribute.UnmarshalListOfMaps(response.Items, &roundResult)
 	if err != nil {
 		panic(err)
