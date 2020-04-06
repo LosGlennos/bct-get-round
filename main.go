@@ -26,14 +26,16 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 	}
 
 	queriedRound := request.QueryStringParameters["queriedRound"]
-
+	
 	if queriedRound == "" {
 		rounds := handler.getAllRounds()
 		returnValue, err := json.Marshal(rounds)
 		if err != nil {
 			panic(err)
 		}
-		return events.APIGatewayProxyResponse{Body: string(returnValue), StatusCode: 200}, nil
+		return events.APIGatewayProxyResponse{Body: string(returnValue), StatusCode: 200, Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+		}}, nil
 	} else {
 		round := handler.getRound(queriedRound)
 		returnValue, err := json.Marshal(round)
@@ -41,7 +43,9 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 			panic(err)
 		}
 
-		return events.APIGatewayProxyResponse{Body: string(returnValue), StatusCode: 200}, nil
+		return events.APIGatewayProxyResponse{Body: string(returnValue), StatusCode: 200, Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+		}}, nil
 	}
 }
 
